@@ -1,0 +1,19 @@
+
+.wrapper_img {
+    overflow: hidden;
+    height: 250px;
+
+    img {
+        background-color: rgb(223, 223, 223);
+        height: 100%;
+    }
+}
+.title {
+    margin-top: 20px;
+    font-size: 16px;
+}
+.date{
+    margin-top: 10px;
+    font-size: 12px;
+    color: grey;
+}
