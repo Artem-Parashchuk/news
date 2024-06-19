@@ -3,15 +3,22 @@ import { NewsBanner } from "../components/NewsBanner/NewsBanner";
 import s from "./Main.module.css";
 import { fetchNews } from "../API/apiNews";
 import { NewsList } from "../components/NewsList/NewsList";
+import { Skeleton } from "../components/Skeleton/Skeleton";
+
+
 export const Main = () => {
   const [news, setNews] = useState([]);
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     const getNews = async () => {
       try {
+        setLoading(true);
         const { news } = await fetchNews();
         setNews(news);
       } catch (error) {
         console.log(error.message);
+      } finally {
+        setLoading(false);
       }
     };
     getNews();
@@ -19,12 +26,14 @@ export const Main = () => {
 
   return (
     <main className={s.main}>
-      {news.length > 0 ? (
+      {news.length > 0 && !loading ? (
         <NewsBanner item={news[0]} />
       ) : (
-        <div className={s.noNews}>No news available</div>
+        <Skeleton count={1} type="banner"/>
       )}
-      <NewsList news={news} />
+
+        
+        { !loading ? <NewsList news={news} /> : <Skeleton count={10} type="item"/>}
     </main>
   );
 };
