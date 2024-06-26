@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
 import { NewsBanner } from "../components/NewsBanner/NewsBanner";
 import s from "./Main.module.css";
-import { fetchNews } from "../API/apiNews";
+import { fetchCategory, fetchNews } from "../API/apiNews";
 import { NewsList } from "../components/NewsList/NewsList";
 import { Skeleton } from "../components/Skeleton/Skeleton";
 import { Pagination } from "../components/Pagination/Pagination";
+import { Categories } from "../components/Categories/Categories";
 
 export const Main = () => {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [category, setCategory] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const totalPage = 10;
   const pageSize = 10;
@@ -19,7 +22,11 @@ export const Main = () => {
       try {
         setLoading(true);
         setError(null); // Reset error state
-        const { news } = await fetchNews(currentPage, pageSize);
+        const { news } = await fetchNews({
+          page_number: currentPage,
+          page_size: pageSize,
+          category: selectedCategory === "All" ? null : selectedCategory,
+        });
         setNews(news);
       } catch (error) {
         setError("Failed to fetch news. Please try again later.");
@@ -29,7 +36,22 @@ export const Main = () => {
       }
     };
     getNews();
-  }, [currentPage]);
+  }, [currentPage, selectedCategory]);
+
+  useEffect(() => {
+    const getCategory = async () => {
+      try {
+        setError(null); // Reset error state
+        const {data} = await fetchCategory();
+        setCategory(["All", ...data.categories]);
+      } catch (error) {
+        setError("Failed to fetch categories. Please try again later.");
+      }
+    };
+    getCategory();
+  }, []);
+
+
 
   const handleNextPage = () => {
     if (currentPage < totalPage) {
@@ -44,10 +66,14 @@ export const Main = () => {
   const handlePageClick = (pageNum) => {
     setCurrentPage(pageNum);
   };
-
   return (
     <main className={s.main}>
-      {error && <div className={s.error}>{error}</div>}
+       {error && <div className={s.error}>{error}</div>}
+      <Categories
+        categories={category}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+      />
 
       {news.length > 0 && !loading ? (
         <NewsBanner item={news[0]} />
